@@ -1,0 +1,8 @@
+streamlit
+pandas
+numpy
+scikit-learn
+wikipedia-api
+sentence-transformers
+torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+torch-geometric
