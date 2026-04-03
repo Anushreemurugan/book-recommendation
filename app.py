@@ -51,7 +51,7 @@ st.markdown("""
 # ====================== Header ======================
 st.markdown("""
     <div class="header">
-        <h1 class="title">📚 BookGNN Recommender</h1>
+        <h1 class="title">📚 Book Recommender</h1>
         <p class="subtitle">Discover your next favorite book using Topological Recommendations</p>
     </div>
 """, unsafe_allow_html=True)
