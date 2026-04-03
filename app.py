@@ -51,8 +51,8 @@ st.markdown("""
 # ====================== Header ======================
 st.markdown("""
     <div class="header">
-        <h1 class="title">📚 Book Recommender</h1>
-        <p class="subtitle">Discover your next favorite book using Topological Recommendations</p>
+        <h1 class="title">📚 BookGNN Recommender</h1>
+        <p class="subtitle">Discover your next favorite book using Topological Recommendation</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -153,7 +153,7 @@ def recommend_books(user_title, top_k=5):
         is_in_dataset = False
 
     similarities = cosine_similarity(query_emb, gnn_embeddings)[0]
-    top_indices = similarities.argsort()[-top_k-15:][::-1]   # Extra candidates
+    top_indices = similarities.argsort()[-top_k-15:][::-1]
 
     recommendations = []
     fallback_books = []
@@ -174,7 +174,7 @@ def recommend_books(user_title, top_k=5):
         if len(recommendations) >= top_k:
             break
 
-    # Fill with fallback if needed
+    # Fill with fallback books if needed
     while len(recommendations) < top_k and fallback_books:
         recommendations.append(fallback_books.pop(0))
 
@@ -209,8 +209,20 @@ if prompt := st.chat_input("🔍 Enter a book title (e.g., Dune, The Alchemist, 
         with st.spinner("Finding similar books with available summaries..."):
             recommend_books(prompt, top_k=5)
 
+# ====================== Sidebar - How to Use ======================
 with st.sidebar:
     st.image("https://source.unsplash.com/400x250/?books,library", use_column_width=True)
-    st.header("About BookGNN")
-    st.info("This recommender uses **Graph Neural Networks (GraphSAGE)** to understand deep topological relationships between books.")
-    st.caption("Built with ❤️ using PyTorch Geometric & Streamlit")
+    
+    st.header("How to Use This Chatbot")
+    st.markdown("""
+    1. **Type a book title** in the chat box below
+    2. Press **Enter**
+    3. The system will find similar books using Graph Neural Networks
+    4. You will get recommendations with story summaries (when available)
+    
+    **Tips:**
+    - Use popular or well-known book titles for best results
+    - The app automatically finds alternative books if summary is not available
+    """)
+    
+    st.caption("Built with GraphSAGE & Sentence-BERT")
