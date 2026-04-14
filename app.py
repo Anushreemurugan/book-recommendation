@@ -15,9 +15,10 @@ from sklearn.metrics import mean_squared_error
 # ====================== Page Config ======================
 st.set_page_config(page_title="BookGNN Recommender", page_icon="📖", layout="wide")
 
-# Adaptive Styling for Light & Dark Mode
+# Clean & Modern Styling
 st.markdown("""
     <style>
+    .main { background-color: #f8fafc; }
     .header {
         background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
         padding: 3rem 0;
@@ -35,19 +36,13 @@ st.markdown("""
         font-size: 22px; 
         opacity: 0.95; 
     }
-
-    /* Recommendation Card - Adaptive for Light & Dark Mode */
     .rec-card {
+        background: white;
         padding: 22px;
         border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
         margin-bottom: 20px;
         border-left: 6px solid #3b82f6;
-        background-color: var(--background-color) !important;
-        border: 1px solid rgba(128, 128, 128, 0.2);
-        color: var(--text-color) !important;
-    }
-    .rec-card h4 {
-        color: var(--text-color) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -116,7 +111,7 @@ df, gnn_model, gnn_embeddings, sbert_model, edge_index, device = load_data_and_m
 
 st.success(f"✅ Loaded **{len(df)} books** • GNN Model Ready")
 
-# ====================== Helper Functions ======================
+# ====================== Wikipedia Functions ======================
 def fetch_wikipedia_summary(title):
     try:
         wiki = wikipediaapi.Wikipedia(user_agent="BookGNN/1.0", language='en')
@@ -186,7 +181,6 @@ def recommend_books(user_title, top_k=5):
         st.markdown(f"""
         <div class="rec-card">
             <h4>⭐ {count+1}. {rec_title}</h4>
-            <p><strong>Similarity:</strong> {sim_score:.3f}</p>
             <p>{summary_text}</p>
         </div>
         """, unsafe_allow_html=True)
