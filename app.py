@@ -15,9 +15,10 @@ from sklearn.metrics import mean_squared_error
 # ====================== Page Config ======================
 st.set_page_config(page_title="BookGNN Recommender", page_icon="📖", layout="wide")
 
-# Adaptive Styling for Light & Dark Mode
+# Clean & Modern Styling
 st.markdown("""
     <style>
+    .main { background-color: #f8fafc; }
     .header {
         background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
         padding: 3rem 0;
@@ -28,18 +29,13 @@ st.markdown("""
     }
     .title { font-size: 46px; font-weight: 700; margin-bottom: 12px; }
     .subtitle { font-size: 22px; opacity: 0.95; }
-
-    /* Recommendation Card - Works in both Light & Dark Mode */
     .rec-card {
+        background: white;
         padding: 22px;
         border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
         margin-bottom: 20px;
         border-left: 6px solid #3b82f6;
-        background-color: var(--background-color) !important;
-        border: 1px solid rgba(128, 128, 128, 0.2);
-    }
-    .rec-card h4 {
-        color: var(--text-color) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -52,8 +48,8 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# ====================== Load Models ======================
-@st.cache_resource(show_spinner="Loading AI Models...")
+# ====================== Load Models (Faster Version) ======================
+@st.cache_resource(show_spinner="Loading models & training GNN (this may take 20-40 seconds on first run)...")
 def load_data_and_model():
     df = pd.read_csv("book_structural_fingerprints.csv")
     model_sbert = SentenceTransformer('all-MiniLM-L6-v2')
@@ -62,6 +58,7 @@ def load_data_and_model():
     embeddings = model_sbert.encode(texts, show_progress_bar=False)
     embeddings = torch.tensor(embeddings, dtype=torch.float)
 
+    # Build Graph
     sim_matrix = cosine_similarity(embeddings)
     threshold = 0.65
     edge_index = []
@@ -91,7 +88,9 @@ def load_data_and_model():
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.005)
     model.train()
-    for epoch in range(50):
+    
+    st.info("Training Graph Neural Network... Please wait")
+    for epoch in range(20):        # Reduced from 50 → Much faster
         optimizer.zero_grad()
         out = model(data.x, data.edge_index)
         loss = F.mse_loss(out, data.x)
@@ -106,9 +105,9 @@ def load_data_and_model():
 
 df, gnn_model, gnn_embeddings, sbert_model, edge_index, device = load_data_and_model()
 
-st.success(f"✅ Loaded **{len(df)} books** • GNN Model Ready")
+st.success(f"✅ Loaded **{len(df)} books** • GNN Training Completed (20 epochs)")
 
-# ====================== Helper Functions ======================
+# ====================== Wikipedia Functions ======================
 def fetch_wikipedia_summary(title):
     try:
         wiki = wikipediaapi.Wikipedia(user_agent="BookGNN/1.0", language='en')
@@ -197,7 +196,7 @@ if prompt := st.chat_input("🔍 Enter a book title (e.g., Dune, The Alchemist, 
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("Finding similar books with available summaries..."):
+        with st.spinner("Finding similar books..."):
             recommend_books(prompt, top_k=5)
 
 # ====================== Sidebar ======================
@@ -206,10 +205,10 @@ with st.sidebar:
     
     st.header("How to Use This Chatbot")
     st.markdown("""
-    1. **Type a book title** in the chat box below  
+    1. Type a book title in the chat box below  
     2. Press **Enter**  
-    3. Get intelligent recommendations using Graph Neural Networks  
-    4. Summaries are shown when available
+    3. Get intelligent recommendations  
+    4. Summaries shown when available
     """)
     
     st.caption("Built with GraphSAGE & Sentence-BERT")
