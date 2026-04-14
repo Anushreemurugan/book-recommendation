@@ -15,10 +15,9 @@ from sklearn.metrics import mean_squared_error
 # ====================== Page Config ======================
 st.set_page_config(page_title="BookGNN Recommender", page_icon="📖", layout="wide")
 
-# Clean & Modern Styling (Works in Light & Dark Mode)
+# Adaptive Styling for Light & Dark Mode
 st.markdown("""
     <style>
-    .main { background-color: #f8fafc; }
     .header {
         background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
         padding: 3rem 0;
@@ -27,28 +26,33 @@ st.markdown("""
         text-align: center;
         margin-bottom: 30px;
     }
-    .title {
-        font-size: 46px;
-        font-weight: 700;
-        margin-bottom: 12px;
+    .title { 
+        font-size: 46px; 
+        font-weight: 700; 
+        margin-bottom: 12px; 
     }
-    .subtitle {
-        font-size: 22px;
-        opacity: 0.95;
-        font-weight: 400;
+    .subtitle { 
+        font-size: 22px; 
+        opacity: 0.95; 
     }
+
+    /* Recommendation Card - Adaptive for Light & Dark Mode */
     .rec-card {
-        background: white;
         padding: 22px;
         border-radius: 16px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
         margin-bottom: 20px;
         border-left: 6px solid #3b82f6;
+        background-color: var(--background-color) !important;
+        border: 1px solid rgba(128, 128, 128, 0.2);
+        color: var(--text-color) !important;
+    }
+    .rec-card h4 {
+        color: var(--text-color) !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# ====================== Header (As per your request) ======================
+# ====================== Header ======================
 st.markdown("""
     <div class="header">
         <h1 class="title">📚 BookGNN Recommender</h1>
@@ -112,7 +116,7 @@ df, gnn_model, gnn_embeddings, sbert_model, edge_index, device = load_data_and_m
 
 st.success(f"✅ Loaded **{len(df)} books** • GNN Model Ready")
 
-# ====================== Wikipedia Functions ======================
+# ====================== Helper Functions ======================
 def fetch_wikipedia_summary(title):
     try:
         wiki = wikipediaapi.Wikipedia(user_agent="BookGNN/1.0", language='en')
@@ -210,9 +214,9 @@ with st.sidebar:
     
     st.header("How to Use This Chatbot")
     st.markdown("""
-    1. **Type a book title** in the chat box below  
-    2. Press **Enter**  
-    3. Get intelligent recommendations using Graph Neural Networks  
+    1. **Type a book title** in the chat box below
+    2. Press **Enter**
+    3. Get intelligent recommendations using Graph Neural Networks
     4. Summaries are shown when available
     """)
     
