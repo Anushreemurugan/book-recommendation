@@ -15,10 +15,9 @@ from sklearn.metrics import mean_squared_error
 # ====================== Page Config ======================
 st.set_page_config(page_title="BookGNN Recommender", page_icon="📖", layout="wide")
 
-# Clean & Modern Styling
+# Adaptive Styling for Light & Dark Mode
 st.markdown("""
     <style>
-    .main { background-color: #f8fafc; }
     .header {
         background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
         padding: 3rem 0;
@@ -27,23 +26,20 @@ st.markdown("""
         text-align: center;
         margin-bottom: 30px;
     }
-    .title {
-        font-size: 48px;
-        font-weight: 700;
-        margin-bottom: 12px;
-    }
-    .subtitle {
-        font-size: 22px;
-        opacity: 0.95;
-        font-weight: 400;
-    }
+    .title { font-size: 46px; font-weight: 700; margin-bottom: 12px; }
+    .subtitle { font-size: 22px; opacity: 0.95; }
+
+    /* Recommendation Card - Works in both Light & Dark Mode */
     .rec-card {
-        background: white;
         padding: 22px;
         border-radius: 16px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
         margin-bottom: 20px;
         border-left: 6px solid #3b82f6;
+        background-color: var(--background-color) !important;
+        border: 1px solid rgba(128, 128, 128, 0.2);
+    }
+    .rec-card h4 {
+        color: var(--text-color) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -112,7 +108,7 @@ df, gnn_model, gnn_embeddings, sbert_model, edge_index, device = load_data_and_m
 
 st.success(f"✅ Loaded **{len(df)} books** • GNN Model Ready")
 
-# ====================== Wikipedia Functions ======================
+# ====================== Helper Functions ======================
 def fetch_wikipedia_summary(title):
     try:
         wiki = wikipediaapi.Wikipedia(user_agent="BookGNN/1.0", language='en')
@@ -131,7 +127,7 @@ def get_full_story_summary(title):
     cleaned = re.sub(r'\s+', ' ', full).strip()
     return textwrap.fill(cleaned, width=100)
 
-# ====================== Recommendation with Fallback ======================
+# ====================== Recommendation Function ======================
 def recommend_books(user_title, top_k=5):
     match = df[df['Title'].str.lower() == user_title.lower().strip()]
 
@@ -161,7 +157,6 @@ def recommend_books(user_title, top_k=5):
     for i in top_indices:
         if is_in_dataset and i == idx:
             continue
-            
         rec_title = df.iloc[i]['Title']
         sim_score = similarities[i]
         summary_text = get_full_story_summary(rec_title)
@@ -174,7 +169,6 @@ def recommend_books(user_title, top_k=5):
         if len(recommendations) >= top_k:
             break
 
-    # Fill with fallback books if needed
     while len(recommendations) < top_k and fallback_books:
         recommendations.append(fallback_books.pop(0))
 
@@ -188,9 +182,6 @@ def recommend_books(user_title, top_k=5):
             <p>{summary_text}</p>
         </div>
         """, unsafe_allow_html=True)
-
-    if len(recommendations) < top_k:
-        st.info(f"Showing {len(recommendations)} recommendations with available summaries.")
 
 # ====================== Chat Interface ======================
 if "messages" not in st.session_state:
@@ -209,20 +200,16 @@ if prompt := st.chat_input("🔍 Enter a book title (e.g., Dune, The Alchemist, 
         with st.spinner("Finding similar books with available summaries..."):
             recommend_books(prompt, top_k=5)
 
-# ====================== Sidebar - How to Use ======================
+# ====================== Sidebar ======================
 with st.sidebar:
     st.image("https://source.unsplash.com/400x250/?books,library", use_column_width=True)
     
     st.header("How to Use This Chatbot")
     st.markdown("""
-    1. **Type a book title** in the chat box below
-    2. Press **Enter**
-    3. The system will find similar books using Graph Neural Networks
-    4. You will get recommendations with story summaries (when available)
-    
-    **Tips:**
-    - Use popular or well-known book titles for best results
-    - The app automatically finds alternative books if summary is not available
+    1. **Type a book title** in the chat box below  
+    2. Press **Enter**  
+    3. Get intelligent recommendations using Graph Neural Networks  
+    4. Summaries are shown when available
     """)
     
     st.caption("Built with GraphSAGE & Sentence-BERT")
